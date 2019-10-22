@@ -19,5 +19,24 @@
 * Memory：用户态应用虚拟内存
 * Access：SEND/RECV，READ，WRITE等操作
 
+如图2所示，从RDMA的宏观传输图中，我们可以看到，数据直接从用户态发送给网卡，再由网卡中的协议栈进行转发到达目标端用户态内存，整个过程完全旁路了内核，不需要用户态到内核态的数据拷贝，降低了延时，同时不经过软件协议栈，也就不需要CPU参与寻址等操作，较少了CPU的使用。在这个过程中，RNIC是最重要的一个设备，那么接下来先介绍RNIC。
 
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/RDMA宏观传输图.png">
+</div>
 
+### 1.2 RNIC
+
+RNIC即RDMA网卡，是RDMA实现kernel bypass的专有硬件，那么RNIC主要又由哪些部分所组成呢？如图3所示，RNIC主要包括QP以及CQ：
+
+QP：Queue Pair，一组工作队列，由发送队列SQ和接收队列RQ组成，主要用于接收应用发起的发送请求和接收请求；
+
+CQ：Completion Queue，完成队列，当发送请求或接收请求完成时都会产生一个完成的通知。
+
+各个队列的具体工作流程会在下面介绍RDMA编程时详细介绍。
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/RNIC组成.png">
+</div>
+
+## 二、RDMA编程
