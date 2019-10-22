@@ -128,5 +128,108 @@ rdma_resolve_route(id, TIMEOUT_IN_MS);
 rdma_connect(id, &cm_params);
 ```
 
+#### 2.3.2 注册内存
+
+```
+ibv_reg_mr( s_ctx->pd, conn->send_region, BUFFER_SIZE,IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_WRITE) );
+```
+
+其中，第二和第三个参数分别代表用户态内存地址和长度；最后一个参数指的是访问该内存的权限：IBV_ACCESS_LOCAL_WRITE指的是允许本机的写权限、IBV_ACCESS_REMOTE_WRITE指的是允许远端的写权限、本地的读权限是默认的、IBV_ACCESS_REMOTE_READ指的是允许远端的读权限。
+
+#### 2.3.3 发起接收请求
+
+前面步骤中介绍了接收请求主要包括了注册到网卡的内存地址和长度，那么体现在代码中就是wr（接收请求）的sg_list成员，指定完内存后，ibv_post_recv函数就完成了将请求发送给网卡接收队列的任务。其中第一个参数指的就是网卡中的具体QP。
+
+```
+wr.sg_list = &sge;
+sge.addr = (uintptr_t)conn->recv_region;
+sge.length = BUFFER_SIZE;
+sge.lkey = conn->recv_mr->lkey;
+ibv_post_recv(conn->qp, &wr, &bad_wr);
+```
+
+#### 2.3.4 发起发送请求
+
+指定内存的部分和接收请求一样，发送请求比接收请求主要多了三个参数的设置，也就是前面介绍参数时说的verb、Inline/non-inline以及Signal/unsignal。
+
+```
+wr.opcode = IBV_WR_SEND;
+wr.send_flags = IBV_SEND_SIGNALED | IBV_SEND_INLINE;
+ibv_post_send(conn->qp, &wr, &bad_wr);
+```
+
+#### 2.3.5 从完成队列中poll完成通知
+
+event-triggered polling指的就是需要下面前三行事件通知的代码，busy polling就不需要前三行代码，直接循环地poll cq，因此消耗更多的CPU。
+
+```
+ibv_get_cq_event(s_ctx->comp_channel, &cq, &ctx);
+ibv_ack_cq_events(cq, 1);
+ibv_req_notify_cq(cq, 0);
+ibv_poll_cq(cq, 1, &wc);
+```
+
+### 2.4 write/read
+
+在具体介绍write/read编程前，先以write为例看一下write的微观传输图，比较它和send/recv的区别。如图6所示，首先，write不需要在接收端发起接收请求，但是相应的需要将注册的内存地址和key值（代表写的权限）发送给发送端，然后发送端在发起发送请求时，就会包括接受端的这个内存地址和key值，直接将数据写到远端内存，而不需要接收端CPU参与。
+
+那么接收端如何将自己注册的内存地址和key值发给发送端呢？很简单，既然我们上面已经掌握了send/recv的编程，那么就直接用send/recv发送，具体过程参考2.3，这里主要介绍一下发送端在接收到这些信息后，如何将本地数据写到远端，和send/recv相同的参数不再赘述，主要看第二、三行，分别是远端地址和key值，另外opcode变成了WRITE：
+
+```
+wr.opcode = IBV_WR_RDMA_WRITE;
+wr.wr.rdma.remote_addr = (uintptr_t)M.remote_addr;
+wr.wr.rdma.rkey = M.rkey;
+ibv_post_send(conn->qp, &wr, &bad_wr);
+```
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/RDMA write微观传输图.jpg">
+</div>
+
+### 2.5 RDMA与应用的结合
+
+在熟悉了RDMA编程后，就可以将RDMA与具体的应用相结合以发挥RDMA的优势，提高应用的性能。如图7所示，现有应用主要包括：大数据应用，深度学习框架，分布式存储，分布式共享内存等。
+
+基础的应用可以参考：HERD[1]、redis[2]等。
+
+进阶的应用可以参考：tensorflow[3]、spark[4]、ceph[5]等。
+
+需要注意的是在将RDMA与应用结合的同时，我们要考虑到如何充分利用RDMA的性能，也就是如何选择上述介绍的RDMA参数。大量单纯在工程上修改应用的工作只是将普遍认为的高性能的RDMA参数运用到应用通信框架中，比如利用one-sided的verb传输数据，利用busy polling获取完成通知。但是这种方式却忽略了应用自己的特性以及服务器的资源状态，具体的RDMA参数选择与不同应用的应用特性以及相关的服务器资源状态有关。
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/RDMA应用部署图.png">
+</div>
+
+## 三、RDMA相关研究
+
+### 3.1	传输层/应用层
+
+* 利用RDMA加速特定应用
+* 易于使用且高性能的RDMA编程库[6]
+* QP share解决可扩展性问题[7]
+* 自动化工具判断各种应用是否适合rdma
+
+### 3.2	网络层/链路层
+
+* 拥塞控制[8][9]
+* 多路径传输[10]
+
+### 3.3	虚拟化
+
+* RDMA+docker容器云[11]
+
+## 四、参考
+
+1.	Using RDMA Efficiently for Key-Value Services.
+2.	Accelerating Redis with RDMA Over InfiniBand.
+3.	https://github.com/tensorflow/tensorflow/tree/v2.0.0/tensorflow/contrib/verbs
+4.	https://github.com/Mellanox/SparkRDMA/blob/master/src/main/java/org/apache/spark/shuffle/rdma
+5.	https://github.com/ceph/ceph/tree/master/src/msg/async/rdma
+6.	RFP: When RPC is Faster than Server-Bypass with RDMA.
+7.	Toward Effective and Fair RDMA Resource Sharing.
+8.	Revisiting Network Support for RDMA.
+9.	HPCC: High Precision Congestion Control.
+10.	Multi-Path Transport for RDMA in Datacenters.
+11.	FreeFlow: Software-based Virtual RDMA Networking for Containerized Clouds.
 
 
