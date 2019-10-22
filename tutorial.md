@@ -40,3 +40,93 @@ CQ：Completion Queue，完成队列，当发送请求或接收请求完成时�
 </div>
 
 ## 二、RDMA编程
+
+### 2.1	RDMA数据传输
+
+介绍具体RDMA编程前，先以类似于传统socket编程的send/recv为例，了解一下RDMA微观的数据传输过程，如图4所示，主要分为以下几步：
+
+* 创建QP、CQ，建立收发两端QP之间的连接（类似于socket功能）；
+* 接收端注册用户内存到网卡RNIC，并发起接收的请求，该请求中就包括了注册到网卡的内存地址和长度；
+* 发送端注册用户内存到网卡RNIC，并发起发送的请求，该请求中就包括了注册到网卡的内存地址和长度；
+* 发送端网卡执行发送请求，根据发送队列SQ中发送请求的内存地址和长度到用户态内存中直接读取数据发送给接收端；
+* 当数据到达接收端时，接收端网卡执行接收请求，根据接收队列RQ中接收请求的内存地址和长度将接收的数据直接写到相应的位置；
+* 接收端数据接收完成后产生一个完成通知CQE到完成队列CQ中，程序从完成队列中取出完成通知CQE代表整个传输过程的结束。
+
+上述文字描述过程看上去很简单，和socket编程差不多，但是由于RDMA编程库的封装性不强以及在整个传输过程中涉及大量的参数选择，RDMA编程其实极为复杂。
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/RDMA send微观传输图.jpg">
+</div>
+
+### 2.2 RDMA参数
+
+前面说RDMA在整个传输过程中涉及大量的参数选择，如图5所示，标注了整个过程涉及的主要参数：
+
+* QP类型：RC、UC、UD（R: reliable, U: unreliable, C: connection, D: datagram），QP的类型需要在建立连接时确定，就像在建立socket通信时，需要确定是TCP还是UDP的连接类型。其中，R、U的区别在于是否是可靠传输，也就是是否返回ack，C、D的区别在于是否是面向连接的，C指的是面向连接的，类似于TCP，在数据传输前，会先建立好连接，也就是QP互相交换相应信息，而D指的是datagram，QP之间连接的信息不是事先确定好的，而是放在数据包的包头，由数据包决定所要发送的具体的接收端的QP是哪个；
+* Verb：send/recv、write、read，具体的传输数据的方式，send/recv和socket类似，write指的是将数据从本地直接写到远端内存，不需要远端CPU参与，read指的是将数据从远端直接读到本地，同样不需要远端CPU参与；
+* Inline/non-inline：inline在C++里指的是内联，在程序编译时直接用函数代码替换函数调用，节省时间，但针对的是那些执行时间较短的函数。同样，在RDMA里面，inline指的就是将一些小的数据包内联在发送请求中，这样在2.1中RDMA数据传输的第四步，就可以少一次取数据的过程；
+* Signal/unsignal：signal/unsignal指的是是否产生CQE，如果使用unsignal，将不会产生CQE，因此也就不需要poll CQE，从而减少CPU使用，提高延时。但是，如果使用了unsignal，必须保证隔一段时间发送一个signal的请求，因为如果没有CQE的产生以及poll，那么这些unsignal的发送请求将一直占用着发送队列，当发送队列满时，将不能再post新的请求；
+* Poll策略：poll策略指的是poll CQE的方式，包括busy polling、event-triggered polling，busy polling以高CPU使用代价换取更快的CQE poll速度，event-triggered polling则相应的poll速度慢，但CPU使用代价低；
+
+在了解了RDMA各种参数后，接下来将介绍具体的RDMA编程中，这些参数是如何体现的（在具体参数选择出会用黄色背景标注出）。
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/RDMA传输参数图.png">
+</div>
+
+### 2.3 send/recv
+
+这里send/recv指的就是上述verb的类型，因为不同verb的通信过程还是有一定区别的，因此分开介绍。那么send/recv在代码的哪里指定呢？我们首先按照2.1中RDMA数据传输的步骤一步一步来：
+
+#### 2.3.1 建立连接
+
+为了简便建立连接的过程，我们利用rdmacm库提供的一系列接口来实现。值得注意的是QP的创建必须在rdma_connect以及rdma_accept之前，因为这两个函数主要封装了QP信息的交换，而如果不使用rdmacm库的话，自己也可以利用socket写一套交换QP信息的程序。
+
+Server端：
+
+* 监听连接：
+
+```
+ec = rdma_create_event_channel();
+rdma_create_id(ec, &listener, NULL, RDMA_PS_TCP);
+rdma_bind_addr(listener, (struct sockaddr *)&addr);
+rdma_listen(listener, 10); 
+```
+
+* 创建QP：
+
+```
+rdma_create_qp(id, s_ctx->pd, &qp_attr)；这里要注意的是qp_attr，顾名思义，qp的属性，那么qp的类型也就是在这个结构中指定，以RC连接类型为例：qp_attr->qp_type = IBV_QPT_RC;
+```
+
+* 完成连接：
+
+```
+rdma_accept(id, &cm_params);
+```
+
+Client端：
+
+* 解析地址、路由：
+
+```
+ec = rdma_create_event_channel();
+rdma_create_id(ec, &conn, NULL, RDMA_PS_TCP);
+rdma_resolve_addr(conn, NULL, addr->ai_addr, TIMEOUT_IN_MS);
+rdma_resolve_route(id, TIMEOUT_IN_MS);
+```
+
+* 创建QP：
+
+```
+参考server端；
+```
+
+* 发起连接：
+
+```
+rdma_connect(id, &cm_params);
+```
+
+
+
