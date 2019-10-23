@@ -195,7 +195,7 @@ int on_addr_resolved(struct rdma_cm_id *id)
   conn->num_completions = 0;
 
   register_memory(conn);
-  post_receives(conn);
+  //post_receives(conn);
 
   TEST_NZ(rdma_resolve_route(id, TIMEOUT_IN_MS));
 
@@ -216,7 +216,7 @@ void on_completion(struct ibv_wc *wc)
   else
     die("on_completion: completion isn't a send or a receive.");
 
-  if (++conn->num_completions == 2)
+  if (++conn->num_completions == 1)
     rdma_disconnect(conn->id);
 }
 

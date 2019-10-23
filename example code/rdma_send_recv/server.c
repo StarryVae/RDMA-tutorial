@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
-
+  addr.sin_port = htons(22222);
   TEST_Z(ec = rdma_create_event_channel());
   TEST_NZ(rdma_create_id(ec, &listener, NULL, RDMA_PS_TCP));
   TEST_NZ(rdma_bind_addr(listener, (struct sockaddr *)&addr));
@@ -267,7 +267,8 @@ int on_event(struct rdma_cm_event *event)
   if (event->event == RDMA_CM_EVENT_CONNECT_REQUEST)
     r = on_connect_request(event->id);
   else if (event->event == RDMA_CM_EVENT_ESTABLISHED)
-    r = on_connection(event->id->context);
+//    r = on_connection(event->id->context);
+    r = 0;
   else if (event->event == RDMA_CM_EVENT_DISCONNECTED)
     r = on_disconnect(event->id);
   else
