@@ -192,7 +192,21 @@ ibv_post_send(conn->qp, &wr, &bad_wr);
 
 [rdma_write_read](https://github.com/StarryVae/RDMA-tutorial/tree/master/example%20code/rdma_write_read)
 
-### 2.6 RDMA与应用的结合
+### 2.6 RDMA参数性能对比example
+
+#### 2.6.1 inline/non-inline
+
+以send/recv为例比较inline/non-inline参数对延时性能的影响：
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/配置-inline.png">
+</div>
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/实验结果-inline.png">
+</div>
+
+### 2.7 RDMA与应用的结合
 
 在熟悉了RDMA编程后，就可以将RDMA与具体的应用相结合以发挥RDMA的优势，提高应用的性能。如图7所示，现有应用主要包括：大数据应用，深度学习框架，分布式存储，分布式共享内存等。
 
