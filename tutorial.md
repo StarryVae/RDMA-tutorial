@@ -199,11 +199,11 @@ ibv_post_send(conn->qp, &wr, &bad_wr);
 以send/recv为例比较inline/non-inline参数对延时性能的影响：
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/配置-inline.png">
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/配置-inline.png" width = 70%>
 </div>
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/实验结果-inline.png" width = 60%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/实验结果-inline.png" width = 70%>
 </div>
 
 #### 2.6.2 verb
@@ -211,11 +211,11 @@ ibv_post_send(conn->qp, &wr, &bad_wr);
 以write和read为例比较verb参数对延时性能的影响：
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/配置-verb.png">
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/配置-verb.png" width = 70%>
 </div>
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/实验结果-verb.png">
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/实验结果-verb.png" width = 70%>
 </div>
 
 #### 2.6.2 poll strategy
@@ -223,11 +223,11 @@ ibv_post_send(conn->qp, &wr, &bad_wr);
 以send/recv为例比较poll参数对延时性能的影响：
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/配置-poll.png">
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/配置-poll.png" width = 70%>
 </div>
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/实验结果-poll.png">
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/实验结果-poll.png" width = 70%>
 </div>
 
 ### 2.7 RDMA与应用的结合
