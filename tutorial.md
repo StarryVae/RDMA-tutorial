@@ -199,11 +199,11 @@ ibv_post_send(conn->qp, &wr, &bad_wr);
 以send/recv为例比较inline/non-inline参数对延时性能的影响：
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/配置-inline.png" width = 50%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/配置-inline.png">
 </div>
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/实验结果-inline.png">
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/实验结果-inline.png" width = 60%>
 </div>
 
 #### 2.6.2 verb
