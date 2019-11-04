@@ -206,6 +206,30 @@ ibv_post_send(conn->qp, &wr, &bad_wr);
     <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/实验结果-inline.png">
 </div>
 
+#### 2.6.2 verb
+
+以write和read为例比较verb参数对延时性能的影响：
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/配置-verb.png">
+</div>
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/实验结果-verb.png">
+</div>
+
+#### 2.6.2 poll strategy
+
+以send/recv为例比较poll参数对延时性能的影响：
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/配置-poll.png">
+</div>
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/实验结果-poll.png">
+</div>
+
 ### 2.7 RDMA与应用的结合
 
 在熟悉了RDMA编程后，就可以将RDMA与具体的应用相结合以发挥RDMA的优势，提高应用的性能。如图7所示，现有应用主要包括：大数据应用，深度学习框架，分布式存储，分布式共享内存等。
