@@ -244,6 +244,12 @@ ibv_post_send(conn->qp, &wr, &bad_wr);
     <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/RDMA应用部署图.png">
 </div>
 
+这里以tensorflow框架为例，拿最简单的手写数字识别的模型进行分布式训练，直观的感受一下RDMA对应用性能的提升
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/tensorflow实验.png" width = 70%>
+</div>
+
 ## 三、RDMA相关研究
 
 ### 3.1	传输层/应用层
