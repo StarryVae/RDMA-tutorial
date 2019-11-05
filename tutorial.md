@@ -39,6 +39,12 @@ CQ：Completion Queue，完成队列，当发送请求或接收请求完成时�
     <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/RNIC组成.png">
 </div>
 
+另外，由于RDMA将协议栈卸载到了网卡中，因此RNIC中也实现了相应的网络协议，以infiniband为例，它的协议栈也是分层的
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/RNIC协议栈.png" width = 70%>
+</div>
+
 ## 二、RDMA编程
 
 ### 2.1	RDMA数据传输
@@ -194,6 +200,8 @@ ibv_post_send(conn->qp, &wr, &bad_wr);
 
 ### 2.6 RDMA参数性能对比example
 
+在熟悉了RDMA编程以及各个参数在代码中的具体位置后就可以设计大量的对比实验观察参数的不同对延时或吞吐量性能的影响，可以直接利用perftest工具，当然最好可以自己写测试代码。
+
 #### 2.6.1 inline/non-inline
 
 以send/recv为例比较inline/non-inline参数对延时性能的影响：
@@ -232,7 +240,7 @@ ibv_post_send(conn->qp, &wr, &bad_wr);
 
 ### 2.7 RDMA与应用的结合
 
-在熟悉了RDMA编程后，就可以将RDMA与具体的应用相结合以发挥RDMA的优势，提高应用的性能。如图7所示，现有应用主要包括：大数据应用，深度学习框架，分布式存储，分布式共享内存等。
+在熟悉了RDMA编程以及RDMA各个参数的性能后，就可以将RDMA与具体的应用相结合以发挥RDMA的优势，提高应用的性能。如图7所示，现有应用主要包括：大数据应用，深度学习框架，分布式存储，分布式共享内存等。
 
 基础的应用可以参考：HERD[1]、redis[2]等。
 
