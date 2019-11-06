@@ -42,7 +42,7 @@ CQ：Completion Queue，完成队列，当发送请求或接收请求完成时�
 另外，由于RDMA将协议栈卸载到了网卡中，因此RNIC中也实现了相应的网络协议，以infiniband为例，它的协议栈也是分层的
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/RNIC协议栈.png" width = 70%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/RDMA协议栈.png" width = 70%>
 </div>
 
 ## 二、RDMA编程
