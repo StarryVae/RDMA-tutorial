@@ -47,6 +47,19 @@ CQ：Completion Queue，完成队列，当发送请求或接收请求完成时�
 
 ## 二、RDMA编程
 
+在了解了RDMA架构之后，只知道它能提供更低的延时和更高的带宽，但没有去亲手验证它的低延时和高带宽，就总感觉虚无缥缈。后来通过各种渠道搜索发现有个perftest工具，可以用来测试RDMA的性能，举个例子：
+
+```
+server：sudo ib_send_lat -F -s 10 -n 1000
+client：sudo ib_send_lat 10.128.16.214 -F -s 10 -n 1000
+```
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/perftest结果.png" width = 70%>
+</div>
+
+这个例子可以看到10B大小的数据包延时在1.5us左右，后续去分析perftest的源码的话，就会涉及到RDMA编程的细节。
+
 ### 2.1	RDMA数据传输
 
 介绍具体RDMA编程前，先以类似于传统socket编程的send/recv为例，了解一下RDMA微观的数据传输过程，如图4所示，主要分为以下几步：
