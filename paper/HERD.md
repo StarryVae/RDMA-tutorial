@@ -1,0 +1,7 @@
+# Using RDMA Efficiently for Key-Value Services
+
+HERD这篇sigcomm 2014的文章，在个人看来，对于初学者来说是RDMA与具体应用结合方面最值得看的一篇文章，它的作者Anuj Kalia在RDMA领域发表了大量的A类会议系统性相关的文章，而且实验源码基本都是开放的，很多细节性的问题在github或者邮件上问他，他都会回复。之所以说这篇文章最值得看，关键在于它针对一个比较简单的应用key-value服务，进行了非常详细的RDMA参数选择的分析。一方面key-value这种应用相比于spark、tensorflow这些大型的系统更为简单，不需要花费大量的时间去了解系统的架构，而能更快的集中在RDMA与应用的结合方面；另一方面，这篇文章涉及到了RDMA verb、connection type等参数的选择，在理论上分析为什么这些参数对key-value性能会有影响，并且在实验中验证了参数选择的效果，在直观上感受到了RDMA参数选择的差异会给应用带来性能上的差异。
+
+
+
+
