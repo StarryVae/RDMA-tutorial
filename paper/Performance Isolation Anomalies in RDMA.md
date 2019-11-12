@@ -20,7 +20,7 @@
 大流使用epoll，小流使用busy poll，从下图可以看到小流的延时和吞吐量性能会急剧下降，大流的相关性能则不会受影响。
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Performance Isolation Anomalies in RDMA 2.jpg" width = 70%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Performance Isolation Anomalies in RDMA 2.png" width = 70%>
 </div>
 
 ### 小流 vs 小流
@@ -28,7 +28,7 @@
 小流与小流的竞争即使是在数据包大小一样的情况下都是不可预测的。
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Performance Isolation Anomalies in RDMA 3.jpg" width = 70%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Performance Isolation Anomalies in RDMA 3.png" width = 70%>
 </div>
 
 ### 结论
