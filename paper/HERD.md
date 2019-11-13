@@ -16,5 +16,10 @@ WRITE的性能这么高，那么是不是服务端返回结果时也可以用WRI
     <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/HERD1.jpg" width = 70%>
 </div>
 
+## HERD的实现
 
+这里我主要关注RDMA数据传输的实现，至于key-value的具体实现，文章也是借用的现有的一种key-value存储结构，就不做过多的叙述。而RDMA数据传输的实现难点主要是在利用WRITE将request发送给服务端，因为WRITE不需要服务端post recv的wqe，也就不会产生cqe，服务端也就无法感知请求的到来。为了解决这个问题，文章在应用层方面定义了需要传输的请求的格式，并且通过CPU去轮询其中的keyhash字段来判断是否有新的请求到来。
 
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/HERD2.png" width = 70%>
+</div>
