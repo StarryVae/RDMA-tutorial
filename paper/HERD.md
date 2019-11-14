@@ -18,8 +18,10 @@ WRITE的性能这么高，那么是不是服务端返回结果时也可以用WRI
 
 ## HERD的实现
 
-这里我主要关注RDMA数据传输的实现，至于key-value的具体实现，文章也是借用的现有的一种key-value存储结构，就不做过多的叙述。而RDMA数据传输的实现难点主要是在利用WRITE将request发送给服务端，因为WRITE不需要服务端post recv的wqe，也就不会产生cqe，服务端也就无法感知请求的到来。为了解决这个问题，文章在应用层方面定义了需要传输的请求的格式，并且通过CPU去轮询其中的keyhash字段来判断是否有新的请求到来。
+这里我主要关注RDMA数据传输的实现，至于key-value的具体实现，文章也是借用的现有的一种key-value存储结构，就不做过多的叙述。而RDMA数据传输的实现难点主要是在利用WRITE将request发送给服务端，因为WRITE不需要服务端post recv的wqe，也就不会产生cqe，服务端也就无法感知请求的到来。为了解决这个问题，文章在应用层方面定义了需要传输的请求的格式，并且通过CPU去轮询其中的keyhash字段来判断是否有新的请求到来。简单来说，我们要想知道请求什么时候到来，只能通过监测接收请求的那块内存得知，那监测内存的什么区域呢？也就是需要自己去制定内存的组织形式，如下图，value、len、key就是内存组织的形式，CPU通过轮询key字段判断新的请求的到来，其实类似于自己实现了busy poll的功能。
 
 <div align=center>
     <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/HERD2.png" width = 70%>
 </div>
+
+这篇文章以及Anuj Kalia后面的一些文章让我真正意义上认识并且体会到RDMA参数的选择对应用性能的影响，并且自己也通过RDMA编程去变换参数观察各个参数选择之后的性能，这也就为后续研究的第一个点打下了一些基础。现在再看这篇文章，实现方面上面提到的WRITE的无法感知请求的问题，其实基本就是通过CPU去poll内存，很容易想到和实现，因为后面我把tensorflow改成WRITE时自己也是这么做的，后来才反应过来HERD也是这样。
