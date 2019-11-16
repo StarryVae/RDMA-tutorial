@@ -1,0 +1,3 @@
+# Improving the Performance of Distributed TensorFlow with RDMA
+
+这篇文章相比于HERD来说就显得简单粗暴一点，直接用RDMA的WRITE和READ替换了tensorflow的gRPC通信框架，并取得了极大的性能提升。当然，tensorflow这种深度学习框架本身就很复杂，能够将它与RDMA相结合在我看来本身就是挺有挑战性的一件事，更不用说如果像HERD一样去进一步分析tensorflow的特性，选择最佳的RDMA参数。
