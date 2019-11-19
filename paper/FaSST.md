@@ -10,6 +10,10 @@ Fast指的是HERD中提到的READ需要多个round trip，而two-sided的元语�
 to a per-QP Doorbell register on the NIC，而这个write操作是比较消耗CPU资源的。因此在使用one-sided元语时，the process must ring multiple Doorbells—as many as the number of destinations appearing in the batch，而With a datagram QP, the process only needs to ring the Doorbell
 once per batch, regardless of the individual message destinations within the batch。
 
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/FaSST1.jpg" width = 70%>
+</div>
+
 ## Scalable
 
 Scalable顾名思义，基于UD的two-sided元语可扩展性很好，因为UD支持一对多的数据传输，不需要创建多个QP。而基于RC/UC的one-sided元语只支持一对一的QP连接，因此需要大量的QP，RNIC就会溢出，性能下降。
