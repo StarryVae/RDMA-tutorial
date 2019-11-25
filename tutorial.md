@@ -115,6 +115,15 @@ rdma_listen(listener, 10);
 * 创建QP：
 
 ```
+qp_attr->send_cq = s_ctx->cq;
+qp_attr->recv_cq = s_ctx->cq;
+qp_attr->qp_type = IBV_QPT_RC;
+
+qp_attr->cap.max_send_wr = 10;
+qp_attr->cap.max_recv_wr = 10;
+qp_attr->cap.max_send_sge = 1;
+qp_attr->cap.max_recv_sge = 1;
+
 rdma_create_qp(id, s_ctx->pd, &qp_attr)；这里要注意的是qp_attr，顾名思义，qp的属性，那么qp的类型也就是在这个结构中指定，以RC连接类型为例：qp_attr->qp_type = IBV_QPT_RC;
 ```
 
@@ -161,9 +170,11 @@ ibv_reg_mr( s_ctx->pd, conn->send_region, BUFFER_SIZE,IBV_ACCESS_LOCAL_WRITE | I
 
 ```
 wr.sg_list = &sge;
+
 sge.addr = (uintptr_t)conn->recv_region;
 sge.length = BUFFER_SIZE;
 sge.lkey = conn->recv_mr->lkey;
+
 ibv_post_recv(conn->qp, &wr, &bad_wr);
 ```
 
@@ -174,6 +185,12 @@ ibv_post_recv(conn->qp, &wr, &bad_wr);
 ```
 wr.opcode = IBV_WR_SEND;
 wr.send_flags = IBV_SEND_SIGNALED | IBV_SEND_INLINE;
+wr.sg_list = &sge;
+
+sge.addr = (uintptr_t)conn->send_region;
+sge.length = BUFFER_SIZE;
+sge.lkey = conn->send_mr->lkey;
+
 ibv_post_send(conn->qp, &wr, &bad_wr);
 ```
 
@@ -182,10 +199,22 @@ ibv_post_send(conn->qp, &wr, &bad_wr);
 event-triggered polling指的就是需要下面前三行事件通知的代码，busy polling就不需要前三行代码，直接循环地poll cq，因此消耗更多的CPU。
 
 ```
-ibv_get_cq_event(s_ctx->comp_channel, &cq, &ctx);
-ibv_ack_cq_events(cq, 1);
-ibv_req_notify_cq(cq, 0);
-ibv_poll_cq(cq, 1, &wc);
+void * poll_cq(void *ctx)
+{
+  struct ibv_cq *cq;
+  struct ibv_wc wc;
+
+  while (1) {
+    TEST_NZ(ibv_get_cq_event(s_ctx->comp_channel, &cq, &ctx));
+    ibv_ack_cq_events(cq, 1);
+    TEST_NZ(ibv_req_notify_cq(cq, 0));
+
+    while (ibv_poll_cq(cq, 1, &wc))
+      on_completion(&wc);
+  }
+
+  return NULL;
+}
 ```
 
 ### 2.4 write/read
