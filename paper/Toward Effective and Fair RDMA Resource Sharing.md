@@ -14,4 +14,16 @@
 
 ## 实现无锁的资源共享
 
+一般的RDMA应用都是直接将wqe post到QP中，那不同的应用在共享一个QP时就会产生对该QP的锁竞争，那么如果用异步的方式处理各个应用的wqe是不是就能消除锁竞争呢？是的，如下图，文章在应用和RNIC之间增加了一层自己设计的Avatar model，其中应用不直接将wqe发送给QP，而是缓存在自己的egress queue中，由模型中的worker线程负责获取egress queues中的wqe并post给相应的QP，这样其实只有worker线程在负责给QP发送wqe，也就消除了锁竞争。当然有人会问这样放到队列中再获取会不会有很大的消耗？文章中是利用I/O多路复用技术epoll来解决这个问题。
+
+其实现在看来也挺简单的，主要就是epoll加上efd的使用，每个应用都会对应自己的egress queue和efd，并且efd会注册到worker线程中，其实就是添加到worker的epoll监听的fd vector中？接着当某个egress queue中有wqe时，worker线程会收到对应efd的通知，并且找到该efd对应的egress queue取出wqe。
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Avatar3.png" width = 70%>
+</div>
+
+<div align=center>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Avatar4.png" width = 70%>
+</div>
+
 ## 实现公平的资源共享
