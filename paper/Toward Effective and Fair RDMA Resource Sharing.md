@@ -23,7 +23,7 @@
 </div>
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Avatar4.png" width = 60%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Avatar4.png" width = 50%>
 </div>
 
 ## 实现公平的资源共享
