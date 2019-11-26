@@ -5,11 +5,11 @@
 **进入正题**，文章的背景就是之前很多文章提到的RDMA网卡缓存有限导致的可扩展性的问题，现有研究都是直接通过多个线程共享QP来缓解这个问题，但是线程间需要竞争保护QP的锁，而这种锁竞争带来的开销会在线程增加的情况下极大的降低系统吞吐量；另一方面，在这种资源共享环境下，需要细粒度的调度来实现应用之间基于优先级的公平的资源共享。接下来就这两方面仔细看一下文章是怎么实现的。
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Avatar1.jpg" width = 60%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Avatar1.jpg" width = 70%>
 </div>
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Avatar2.jpg" width = 60%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Avatar2.jpg" width = 70%>
 </div>
 
 ## 实现无锁的资源共享
@@ -19,11 +19,11 @@
 其实现在看来也挺简单的，主要就是epoll加上efd的使用，每个应用都会对应自己的egress queue和efd，并且efd会注册到worker线程中，其实就是添加到worker的epoll监听的fd vector中？接着当某个egress queue中有wqe时，worker线程会收到对应efd的通知，并且找到该efd对应的egress queue取出wqe。
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Avatar3.png" width = 70%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Avatar3.png" width = 60%>
 </div>
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Avatar4.png" width = 70%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/Avatar4.png" width = 60%>
 </div>
 
 ## 实现公平的资源共享
