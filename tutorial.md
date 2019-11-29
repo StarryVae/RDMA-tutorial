@@ -322,7 +322,11 @@ ibv_post_send(conn->qp, &wr, &bad_wr);
 
 这里我主要列举一些在我学习RDMA过程中看过的一些有意义，对自己提升较大的文章，并且详细介绍这些文章的亮点以及自己看完的收获。具体的内容移步https://github.com/StarryVae/RDMA-tutorial/tree/master/paper
 
-## 五、参考
+## 五、面试相关
+
+RDMA相关的面试经验：https://github.com/StarryVae/RDMA-tutorial/tree/master/interview
+
+## 六、参考
 
 1.	Using RDMA Efficiently for Key-Value Services.
 2.	Accelerating Redis with RDMA Over InfiniBand.
