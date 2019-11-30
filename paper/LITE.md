@@ -26,6 +26,14 @@ LITE的内存抽象主要考虑到LITE的通用及灵活性，因为原生RDMA�
 
 ### LITE RPC
 
+LITE RPC是基于WRITE with imm元语实现的RPC机制，并且所有的RPC请求都共享一个CQ，节省CPU开销。还有一些用户态到内核态的优化可以具体看文章。
+
+### LITE资源共享
+
+LITE的资源共享指的是在应用之间实现QP、CQ的资源共享，但没有具体的资源共享的策略。
+
 <div align=center>
     <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/LITE.png" width = 70%>
 </div>
+
+总的来说，LITE在kernel实现了一个虚拟层完成RDMA内存的管理、资源的共享、接口的抽象，并通过一系列系统性的优化在保证RDMA性能的同时，解决了RDMA在数据中心与应用结合存在的接口不匹配、可扩展性差、缺乏资源共享的问题。基于此进一步思考的话，其实LITE的接口抽象只是WRITE、READ、WRITE_WITM_IMM元语的封装，应用在与RDMA结合时还是要自己去决策选用哪种传输方式；另外LITE的资源共享只是系统性的实现，没有具体的资源共享策略，是否可以根据RDMA资源之间的特性找到应用之间资源共享的最佳策略。
