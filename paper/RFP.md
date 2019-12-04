@@ -27,3 +27,10 @@ redesign cost通过RPC提供的接口很容易解决，问题是如何提供高�
 <div align=center>
     <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/RFP3.png" width = 60%>
 </div>
+
+## Challenges
+
+* client什么时候去read server的内存以获取结果
+* client获取结果时的默认大小最好是多少
+
+## Solution
