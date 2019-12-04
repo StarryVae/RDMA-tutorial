@@ -12,11 +12,11 @@ redesign cost通过RPC提供的接口很容易解决，问题是如何提供高�
 * server-bypass的实际性能由于可能需要多次access完成一个请求的原因并不如预想的好
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/RFP1.png" width = 70%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/RFP1.png" width = 60%>
 </div>
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/RFP2.png" width = 70%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/RFP2.png" width = 60%>
 </div>
 
 因此，基于以上两点发现，文章考虑RPC内部机制的实现如下：
@@ -25,5 +25,5 @@ redesign cost通过RPC提供的接口很容易解决，问题是如何提供高�
 * server端需要参与处理client发过来的请求，这样就避免了server-bypass带来的多次access问题
 
 <div align=center>
-    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/RFP3.png" width = 70%>
+    <img src="https://github.com/StarryVae/RDMA-tutorial/blob/master/image/paper/RFP3.png" width = 60%>
 </div>
