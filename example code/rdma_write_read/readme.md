@@ -2,8 +2,8 @@
 
 ### Server: ###
     - make  
-    - ./server <write/read>  
+    - ./rdma-server <write/read>  
 
 ### Client: ###
     - make
-    - ./client <write/read> <server address> <server port(default: 22222)>
+    - ./rdma-client <write/read> <server address> <server port(default:22222>
